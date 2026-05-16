@@ -1,0 +1,390 @@
+// ── Variables ────────────────────────────────────────────────────────────────
+$bg-page:        #0a0f1e;          // was #0d1117 — slightly deeper navy
+$bg-card:        #131929;          // was #161b22
+$bg-panel:       #1a2238;          // was #1c2230
+$bg-input:       #0d1626;          // was #1e2535
+$border-color:   #1e2d45;          // was #2a3348
+$text-primary:   #e0f2fe;          // was #e6edf3 — cool white with cyan tint
+$text-muted:     #7d8590;          // unchanged
+$accent:         #6366f1;          // was #ff2d78 — indigo
+$accent-alt:     #818cf8;          // was #ff6b9d — light indigo
+$accent-cyan:    #06b6d4;          // NEW — cyan secondary
+$accent-cyan-lt: #67e8f9;          // NEW — light cyan
+$badge-required: #06b6d4;          // was #ff2d78 — cyan
+$badge-best:     #6366f1;          // was #ff2d78 — indigo
+$info-bg:        #0c2a3a;          // was #1b2a4a — cyan tinted
+$info-border:    #0e7490;          // was #2d4a7a — cyan border
+$font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+ 
+// ── Page Shell ───────────────────────────────────────────────────────────────
+.home-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: $bg-page;
+    color: $text-primary;
+    font-family: $font-stack;
+ 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    gap: 2rem;
+}
+ 
+// ── Page Header ──────────────────────────────────────────────────────────────
+.page-header {
+    text-align: center;
+ 
+    h1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: $text-primary;
+    }
+ 
+    p {
+        color: $text-muted;
+        font-size: 0.95rem;
+        max-width: 480px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+ 
+    .highlight {
+        color: $accent-cyan;          // was $accent (pink) — now cyan
+    }
+}
+ 
+// ── Main Card ─────────────────────────────────────────────────────────────────
+.interview-card {
+    width: 100%;
+    max-width: 900px;
+    background-color: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: 1rem;
+    overflow: hidden;
+ 
+    &__body {
+        display: flex;
+        min-height: 520px;
+    }
+ 
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid $border-color;
+ 
+        .footer-info {
+            font-size: 0.8rem;
+            color: $text-muted;
+        }
+    }
+}
+ 
+.form-error {
+    margin: 0 1.5rem 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: rgba($accent, 0.12);
+    border: 1px solid rgba($accent, 0.4);
+    color: $accent-alt;
+    font-size: 0.9rem;
+}
+ 
+// ── Panels ────────────────────────────────────────────────────────────────────
+.panel-divider {
+    width: 1px;
+    background-color: $border-color;
+    flex-shrink: 0;
+}
+ 
+.panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+ 
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+ 
+        h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: $text-primary;
+            flex: 1;
+        }
+    }
+ 
+    &__icon {
+        display: flex;
+        align-items: center;
+        color: $accent-cyan;          // was $accent (pink) — now cyan
+    }
+ 
+    &__textarea {
+        flex: 1;
+        width: 100%;
+        background-color: $bg-input;
+        border: 1px solid $border-color;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        color: $text-primary;
+        font-family: $font-stack;
+        font-size: 0.875rem;
+        resize: none;
+        outline: none;
+        transition: border-color 0.2s;
+        line-height: 1.5;
+ 
+        &::placeholder {
+            color: $text-muted;
+        }
+ 
+        &:focus {
+            border-color: $accent;    // indigo focus ring
+        }
+ 
+        &--short {
+            flex: unset;
+            height: 96px;
+        }
+    }
+ 
+    &--left {
+        position: relative;
+ 
+        .char-counter {
+            position: absolute;
+            bottom: 2.25rem;
+            right: 2rem;
+            font-size: 0.75rem;
+            color: $text-muted;
+        }
+    }
+ 
+    &--right {
+        gap: 0.75rem;
+    }
+}
+ 
+// ── Badges ────────────────────────────────────────────────────────────────────
+.badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+ 
+    &--required {
+        background-color: rgba($badge-required, 0.15);  // cyan tint
+        color: $badge-required;                          // cyan text
+        border: 1px solid rgba($badge-required, 0.3);
+    }
+ 
+    &--best {
+        background-color: rgba($badge-best, 0.15);       // indigo tint
+        color: $accent-alt;                              // light indigo text
+        border: 1px solid rgba($badge-best, 0.3);
+    }
+}
+ 
+// ── Section Label ─────────────────────────────────────────────────────────────
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $text-primary;
+    margin-bottom: 0.25rem;
+}
+ 
+// ── Dropzone ──────────────────────────────────────────────────────────────────
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+ 
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.5rem 1rem;
+    background-color: $bg-input;
+    border: 2px dashed $border-color;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+ 
+    &:hover {
+        border-color: $accent-cyan;                      // was $accent (pink)
+        background-color: rgba($accent-cyan, 0.05);      // cyan glow on hover
+    }
+ 
+    &__icon {
+        color: $accent-cyan;                             // was $accent (pink)
+        margin-bottom: 0.25rem;
+    }
+ 
+    &__title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $text-primary;
+        margin: 0;
+    }
+ 
+    &__subtitle {
+        font-size: 0.75rem;
+        color: $text-muted;
+        margin: 0;
+    }
+}
+ 
+// ── OR Divider ────────────────────────────────────────────────────────────────
+.or-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: $text-muted;
+    font-size: 0.75rem;
+ 
+    &::before,
+    &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: $border-color;
+    }
+ 
+    span {
+        white-space: nowrap;
+    }
+}
+ 
+// ── Self Description ──────────────────────────────────────────────────────────
+.self-description {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+ 
+// ── Info Box ──────────────────────────────────────────────────────────────────
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    background-color: $info-bg;          // was #1b2a4a — now cyan tinted
+    border: 1px solid $info-border;      // was #2d4a7a — now cyan border
+    border-radius: 0.5rem;
+ 
+    &__icon {
+        flex-shrink: 0;
+        color: $accent-cyan;             // was #4a90e2 — now cyan
+        margin-top: 1px;
+    }
+ 
+    p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: $accent-cyan-lt;          // was #8ab4f8 — now light cyan
+        line-height: 1.5;
+ 
+        strong {
+            color: $text-primary;
+        }
+    }
+}
+ 
+// ── Generate Button ───────────────────────────────────────────────────────────
+.generate-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, $accent 0%, $accent-cyan 100%); // indigo → cyan
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    font-family: $font-stack;
+ 
+    &:hover {
+        opacity: 0.9;
+    }
+ 
+    &:active {
+        transform: scale(0.98);
+    }
+}
+ 
+// ── Recent Reports ────────────────────────────────────────────────────────────
+.recent-reports {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 900px;
+ 
+    .reports-list {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+ 
+        .report-item {
+            background-color: $bg-card;
+            border: 1px solid $border-color;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: border-color 0.2s;
+ 
+            &:hover {
+                border-color: $accent-cyan;   // cyan hover glow on cards
+            }
+ 
+            .match-score {
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: $accent-cyan;          // was $accent (pink) — now cyan
+                align-items: flex-start;
+            }
+        }
+    }
+}
+ 
+// ── Page Footer ───────────────────────────────────────────────────────────────
+.page-footer {
+    display: flex;
+    gap: 1.5rem;
+ 
+    a {
+        font-size: 0.8rem;
+        color: $text-muted;
+        text-decoration: none;
+        transition: color 0.2s;
+ 
+        &:hover {
+            color: $text-primary;
+        }
+    }
+}

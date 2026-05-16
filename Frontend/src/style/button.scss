@@ -1,0 +1,26 @@
+// paste these two lines at the top of button.scss
+$accent:      #6366f1;
+$accent-cyan: #06b6d4;
+
+.button {
+    border: none;
+    outline: none;
+    padding-inline: 1.5rem;
+    padding-block: 0.75rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+
+    &.primary-button {
+        background: linear-gradient(135deg, $accent 0%, $accent-cyan 100%);
+        color: #fff;
+
+        &:hover {
+            opacity: 0.9;
+        }
+    }
+
+    &:active {
+        transform: scale(0.9);
+    }
+}
