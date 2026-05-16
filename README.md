@@ -4,13 +4,6 @@
 
 Paste a job description + resume (or self-summary) → get a **match score**, **skill gap analysis**, **technical & behavioral Q&A**, a **day-by-day prep roadmap**, and an optional **tailored resume PDF**.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node" />
-  <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
-  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini" />
-</p>
-
 ---
 
 ## UI Preview
