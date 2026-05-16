@@ -229,46 +229,6 @@ Click any file to jump to it in the repo.
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- MongoDB (Atlas or local)
-- [Google AI Studio](https://aistudio.google.com/) API key
-
-### Install & run
-
-```bash
-# Backend
-cd Backend
-npm install
-# Create Backend/.env (see below)
-npm run dev
-
-# Frontend (new terminal)
-cd Frontend
-npm install
-npm run dev
-```
-
-Open **http://localhost:5173**
-
-### Environment variables (`Backend/.env`)
-
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_long_random_secret
-GOOGLE_GENAI_API_KEY=your_gemini_api_key
-
-# Optional
-GEMINI_MODEL=gemini-3-flash-preview
-```
-
-> Never commit `.env` — it is listed in [.gitignore](./.gitignore).
-
----
-
 ## Security
 
 - Passwords hashed with **bcrypt**
@@ -277,14 +237,3 @@ GEMINI_MODEL=gemini-3-flash-preview
 - Interview data scoped per user
 - CORS: `http://localhost:5173` (dev)
 
----
-
-## Resume / Portfolio Blurb
-
-**InterviewIQ** — AI interview prep app (React, Node.js, MongoDB, Google Gemini). Analyzes job description + resume to generate match score, skill gaps, and day-by-day prep roadmap with technical/behavioral Q&A and tailored resume PDF export.
-
----
-
-## Author
-
-Full-stack portfolio project — REST APIs, JWT auth, file uploads, structured AI output, and modern React architecture.
