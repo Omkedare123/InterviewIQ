@@ -1,43 +1,45 @@
-# Interview Master — AI-Powered Interview Preparation Platform
+# InterviewIQ
 
-Interview Master is a full-stack web application that helps job seekers prepare for interviews using **Google Gemini AI**. Users paste a target job description, upload a resume (PDF) or write a short self-summary, and the app generates a personalized interview strategy: technical and behavioral questions, skill-gap analysis, a day-by-day preparation roadmap, and an optional tailored resume PDF.
+**AI-powered interview preparation platform** built with React, Node.js, MongoDB & Google Gemini.
+
+Paste a job description + resume (or self-summary) → get a **match score**, **skill gap analysis**, **technical & behavioral Q&A**, a **day-by-day prep roadmap**, and an optional **tailored resume PDF**.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React" />
+  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node" />
+  <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini" />
+</p>
 
 ---
 
-## Problem It Solves
+## UI Preview
 
-Preparing for a specific role usually means guessing what interviewers will ask and how well your profile fits the job. Interview Master automates that work by analyzing the **job description** against the **candidate’s resume or self-description**, then producing structured, actionable prep material in one place.
+### Home — Create interview plan
+Job description input, PDF resume upload, self-description, recent plans, and one-click AI generation.
+
+<p align="center">
+  <img src="./docs/screenshots/home.png" alt="InterviewIQ Home — Create Custom Interview Plan" width="900" />
+</p>
+
+### Interview dashboard — Generated report
+Technical questions, behavioral section, roadmap, match score ring, skill gaps, and download resume.
+
+<p align="center">
+  <img src="./docs/screenshots/interview-dashboard.png" alt="InterviewIQ Dashboard — Technical Questions and Match Score" width="900" />
+</p>
 
 ---
 
-## Key Features
+## What It Does
 
-### Authentication
-- User registration and login (email + password)
-- JWT stored in **HTTP-only cookies** for secure sessions
-- Protected routes — dashboard and interview pages require login
-- Logout with token blacklisting
-
-### AI Interview Plan Generator
-- Paste a **target job description** (required)
-- Provide a **PDF resume** and/or **self-description** (at least one required)
-- Gemini generates:
-  - **Match score** (0–100) — how well the profile fits the role
-  - **Technical questions** — with interviewer intention and model answers
-  - **Behavioral questions** — with intention and suggested responses
-  - **Skill gaps** — skills to improve, tagged by severity (low / medium / high)
-  - **Preparation roadmap** — multi-day plan with focus areas and daily tasks
-  - **Job title** — inferred from the job description
-
-### Interview Report Dashboard
-- View generated plans in three sections: Technical, Behavioral, Road Map
-- Expandable question cards (question, intention, answer)
-- Match score visualization and skill-gap tags
-- **Download Resume** — AI-generated, job-tailored resume as PDF (Puppeteer)
-
-### History
-- List of past interview plans on the home page
-- Click any plan to reopen the full report
+| Step | Action |
+|------|--------|
+| 1 | **Register / Login** — secure JWT session (HTTP-only cookies) |
+| 2 | **Home** — paste job description + upload PDF resume or write a short profile |
+| 3 | **Generate** — Gemini builds structured JSON (questions, gaps, roadmap, score) |
+| 4 | **Dashboard** — explore Technical / Behavioral / Road Map tabs |
+| 5 | **Download** — optional AI-tailored resume as PDF (Puppeteer) |
 
 ---
 
@@ -45,188 +47,244 @@ Preparing for a specific role usually means guessing what interviewers will ask 
 
 | Layer | Technologies |
 |--------|----------------|
-| **Frontend** | React 19, Vite, React Router 7, Axios, SCSS |
-| **Backend** | Node.js, Express 5 |
-| **Database** | MongoDB (Mongoose) |
-| **AI** | Google Gemini API (`@google/genai`) — structured JSON output |
-| **Auth** | JWT, bcrypt, cookie-parser, CORS with credentials |
-| **File handling** | Multer (in-memory PDF upload), pdf-parse v2 |
-| **PDF export** | Puppeteer (HTML → PDF for tailored resumes) |
-| **Validation** | Zod (server-side response validation) |
+| **Frontend** | React 19, Vite 8, React Router 7, Axios, SCSS |
+| **Backend** | Node.js, Express 5, Multer, pdf-parse |
+| **Database** | MongoDB, Mongoose |
+| **AI** | Google Gemini (`@google/genai`) — structured JSON output |
+| **Auth** | JWT, bcrypt, cookie-parser, token blacklist |
+| **PDF** | Puppeteer (HTML → PDF resume export) |
+| **Validation** | Zod |
 
 ---
 
-## Architecture
+## System Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Frontend — React (Vite) :5173"]
+        UI[Pages: Login · Home · Interview]
+        CTX[AuthContext · InterviewContext]
+        API_CLIENT[Axios + credentials]
+    end
+
+    subgraph Server["Backend — Express :5000"]
+        ROUTES[Routes]
+        CTRL[Controllers]
+        MW[Auth + Upload Middleware]
+        AI[ai.service.js]
+    end
+
+    subgraph External["External Services"]
+        DB[(MongoDB)]
+        GEMINI[Google Gemini API]
+    end
+
+    UI --> CTX --> API_CLIENT
+    API_CLIENT -->|REST + cookies| ROUTES
+    ROUTES --> MW --> CTRL
+    CTRL --> DB
+    CTRL --> AI --> GEMINI
+    AI -->|PDF export| UI
+```
+
+### Request flow (generate plan)
 
 ```
-┌─────────────────┐     HTTP + cookies      ┌─────────────────┐
-│  React (Vite)   │ ◄──────────────────────►│  Express API    │
-│  localhost:5173 │                         │  localhost:5000 │
-└────────┬────────┘                         └────────┬────────┘
-         │                                           │
-         │  AuthContext / InterviewContext           │  Controllers
-         │  Protected routes                         │  ├── auth
-         │                                           │  └── interview
-         │                                           │
-         │                                    ┌──────▼──────┐
-         │                                    │  MongoDB    │
-         │                                    └─────────────┘
-         │                                           │
-         │                                    ┌──────▼──────┐
-         └────────────────────────────────────│  Gemini API │
-                                              └─────────────┘
+User → Home.jsx → interview.api.js → POST /api/interview/
+     → auth.middleware → multer (PDF) → interview.controller
+     → pdf-parse → ai.service (Gemini) → MongoDB save
+     → navigate → Interview.jsx → GET /api/interview/report/:id
 ```
-
-### Frontend structure (`Frontend/src/`)
-- **Feature-based folders** under `features/auth` and `features/interview`
-- **Auth**: Login, Register, `AuthProvider`, `useAuth`, `Protected` route guard
-- **Interview**: Home (generator), Interview (report view), `InterviewProvider`, `useInterview`
-- **Routing**: `app.routes.jsx` with public auth routes and protected app routes
-
-### Backend structure (`Backend/src/`)
-- **Routes** → **Controllers** → **Services** / **Models**
-- `auth.routes.js` — register, login, logout, get current user
-- `interview.route.js` — create report, list reports, get by ID, generate resume PDF
-- `ai.service.js` — Gemini prompts, JSON schema, response normalization
-- `auth.middleware.js` — JWT verification from cookies
 
 ---
 
-## API Endpoints
+## Project Navigator
 
-### Auth (`/api/auth`)
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/register` | Create account |
-| POST | `/login` | Sign in (sets cookie) |
-| GET | `/logout` | Sign out (blacklists token) |
-| GET | `/get-me` | Current user (protected) |
+Click any file to jump to it in the repo.
 
-### Interview (`/api/interview`) — all protected
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/` | Generate new interview report (multipart: jobDescription, selfDescription, resume PDF) |
-| GET | `/` | List user’s past reports (summary fields) |
-| GET | `/report/:interviewId` | Full report by ID |
-| POST | `/resume/pdf/:interviewReportId` | Download tailored resume PDF |
+### Root
+
+| File | Purpose |
+|------|---------|
+| [README.md](./README.md) | Project documentation |
+| [.gitignore](./.gitignore) | Git ignore rules (env, node_modules, dist) |
+| [docs/screenshots/](./docs/screenshots/) | UI preview images for README |
+
+---
+
+### Backend
+
+| File | Purpose |
+|------|---------|
+| [Backend/server.js](./Backend/server.js) | Entry point — loads env, DB, starts Express on port 5000 |
+| [Backend/package.json](./Backend/package.json) | Backend dependencies & scripts |
+
+#### `Backend/src/`
+
+| File | Purpose |
+|------|---------|
+| [app.js](./Backend/src/app.js) | Express app — CORS, JSON, mounts `/api/auth` & `/api/interview` |
+| [config/database.js](./Backend/src/config/database.js) | MongoDB connection via `MONGO_URI` |
+
+#### Routes
+
+| File | Purpose |
+|------|---------|
+| [routes/auth.routes.js](./Backend/src/routes/auth.routes.js) | `POST /register`, `POST /login`, `GET /logout`, `GET /get-me` |
+| [routes/interview.route.js](./Backend/src/routes/interview.route.js) | CRUD interview reports + resume PDF generation |
+
+#### Controllers
+
+| File | Purpose |
+|------|---------|
+| [controllers/auth.controller.js](./Backend/src/controllers/auth.controller.js) | Register, login, logout, getMe — JWT cookies |
+| [controllers/interview.controller.js](./Backend/src/controllers/interview.controller.js) | Generate report, list/get reports, export resume PDF |
+
+#### Middlewares
+
+| File | Purpose |
+|------|---------|
+| [middlewares/auth.middleware.js](./Backend/src/middlewares/auth.middleware.js) | Verify JWT from cookie, check blacklist |
+| [middlewares/file.middleware.js](./Backend/src/middlewares/file.middleware.js) | Multer memory storage for PDF upload (max 3MB) |
+
+#### Models
+
+| File | Purpose |
+|------|---------|
+| [models/user.model.js](./Backend/src/models/user.model.js) | User schema (username, email, hashed password) |
+| [models/interviewReport.model.js](./Backend/src/models/interviewReport.model.js) | Interview plan schema (questions, gaps, roadmap, score) |
+| [models/blacklist.model.js](./Backend/src/models/blacklist.model.js) | Invalidated JWT tokens on logout |
+
+#### Services
+
+| File | Purpose |
+|------|---------|
+| [services/ai.service.js](./Backend/src/services/ai.service.js) | Gemini prompts, JSON schema, report normalization, Puppeteer PDF |
+
+---
+
+### Frontend
+
+| File | Purpose |
+|------|---------|
+| [Frontend/package.json](./Frontend/package.json) | Frontend dependencies & Vite scripts |
+| [Frontend/index.html](./Frontend/index.html) | HTML shell |
+| [Frontend/vite.config.js](./Frontend/vite.config.js) | Vite configuration |
+
+#### `Frontend/src/` — Core
+
+| File | Purpose |
+|------|---------|
+| [main.jsx](./Frontend/src/main.jsx) | React root mount |
+| [App.jsx](./Frontend/src/App.jsx) | `AuthProvider` + `InterviewProvider` + router |
+| [app.routes.jsx](./Frontend/src/app.routes.jsx) | Route definitions (login, register, home, interview) |
+| [style.scss](./Frontend/src/style.scss) | Global styles + imports button styles |
+| [style/button.scss](./Frontend/src/style/button.scss) | Shared `.button` / `.primary-button` styles |
+
+#### `features/auth/`
+
+| File | Purpose |
+|------|---------|
+| [auth.context.jsx](./Frontend/src/features/auth/auth.context.jsx) | Auth state — user, loading, `getMe` on mount |
+| [hooks/useAuth.js](./Frontend/src/features/auth/hooks/useAuth.js) | Login, register, logout handlers |
+| [services/auth.api.js](./Frontend/src/features/auth/services/auth.api.js) | Axios client — auth API calls |
+| [components/Protected.jsx](./Frontend/src/features/auth/components/Protected.jsx) | Route guard — redirect to `/login` if no user |
+| [pages/Login.jsx](./Frontend/src/features/auth/pages/Login.jsx) | Login form |
+| [pages/Register.jsx](./Frontend/src/features/auth/pages/Register.jsx) | Registration form |
+| [auth.form.scss](./Frontend/src/features/auth/auth.form.scss) | Auth page form styles |
+
+#### `features/interview/`
+
+| File | Purpose |
+|------|---------|
+| [interview.context.jsx](./Frontend/src/features/interview/interview.context.jsx) | Report list, current report, loading state |
+| [hooks/useInterview.js](./Frontend/src/features/interview/hooks/useInterview.js) | Generate, fetch, list reports + PDF download |
+| [services/interview.api.js](./Frontend/src/features/interview/services/interview.api.js) | Axios — interview API + multipart upload |
+| [pages/Home.jsx](./Frontend/src/features/interview/pages/Home.jsx) | Job description + resume upload + generate CTA |
+| [pages/Interview.jsx](./Frontend/src/features/interview/pages/Interview.jsx) | Report dashboard (questions, score, gaps, roadmap) |
+| [style/home.scss](./Frontend/src/features/interview/style/home.scss) | Home page dark theme & layout |
+| [style/interview.scss](./Frontend/src/features/interview/style/interview.scss) | Interview dashboard styles |
+
+---
+
+## API Reference
+
+### Auth — `/api/auth`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/register` | Public | Create account |
+| POST | `/login` | Public | Sign in (sets cookie) |
+| GET | `/logout` | Public | Sign out + blacklist token |
+| GET | `/get-me` | Protected | Current user |
+
+### Interview — `/api/interview`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/` | Protected | Generate report (`jobDescription`, `selfDescription`, `resume` PDF) |
+| GET | `/` | Protected | List user's past reports |
+| GET | `/report/:interviewId` | Protected | Full report by ID |
+| POST | `/resume/pdf/:interviewReportId` | Protected | Download tailored resume PDF |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
-- MongoDB Atlas or local MongoDB
+- MongoDB (Atlas or local)
 - [Google AI Studio](https://aistudio.google.com/) API key
 
-### 1. Clone and install
+### Install & run
 
 ```bash
 # Backend
 cd Backend
 npm install
+# Create Backend/.env (see below)
+npm run dev
 
-# Frontend
-cd ../Frontend
+# Frontend (new terminal)
+cd Frontend
 npm install
+npm run dev
 ```
 
-### 2. Environment variables
+Open **http://localhost:5173**
 
-Create `Backend/.env`:
+### Environment variables (`Backend/.env`)
 
 ```env
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_long_random_secret
 GOOGLE_GENAI_API_KEY=your_gemini_api_key
 
-# Optional — defaults to gemini-2.5-flash
+# Optional
 GEMINI_MODEL=gemini-3-flash-preview
 ```
 
-### 3. Run development servers
-
-```bash
-# Terminal 1 — Backend (port 5000)
-cd Backend
-npm run dev
-
-# Terminal 2 — Frontend (port 5173)
-cd Frontend
-npm run dev
-```
-
-Open **http://localhost:5173** → register → create an interview plan.
+> Never commit `.env` — it is listed in [.gitignore](./.gitignore).
 
 ---
 
-## User Flow
-
-1. **Register / Login** → session cookie set  
-2. **Home** → enter job description + resume PDF or self-description → **Generate**  
-3. Backend parses PDF text, calls Gemini with structured JSON schema, saves report to MongoDB  
-4. **Interview page** → browse technical / behavioral questions, roadmap, match score, skill gaps  
-5. Optional: **Download Resume** → AI writes HTML → Puppeteer exports PDF  
-
----
-
-## Data Model (Interview Report)
-
-Each saved report includes:
-- `jobDescription`, `resume`, `selfDescription`
-- `title`, `matchScore`
-- `technicalQuestions[]`, `behavioralQuestions[]`
-- `skillGaps[]`, `preparationPlan[]`
-- `user` (reference), `createdAt` / `updatedAt`
-
----
-
-## Security Notes
+## Security
 
 - Passwords hashed with **bcrypt**
-- JWT in **httpOnly**, **sameSite: lax** cookies
-- Invalid/logged-out tokens stored in a **blacklist**
-- Interview APIs scoped to the authenticated user’s reports
-- CORS restricted to `http://localhost:5173` in development
+- JWT in **httpOnly** cookies (`sameSite: lax`)
+- Token **blacklist** on logout
+- Interview data scoped per user
+- CORS: `http://localhost:5173` (dev)
 
 ---
 
-## Project Structure
+## Resume / Portfolio Blurb
 
-```
-Yt_genai/
-├── Backend/
-│   ├── server.js
-│   └── src/
-│       ├── app.js
-│       ├── config/database.js
-│       ├── controllers/     # auth, interview
-│       ├── middlewares/     # auth, file upload
-│       ├── models/          # user, interviewReport, blacklist
-│       ├── routes/
-│       └── services/        # ai.service.js (Gemini + Puppeteer)
-├── Frontend/
-│   └── src/
-│       ├── app.routes.jsx
-│       ├── App.jsx
-│       └── features/
-│           ├── auth/
-│           └── interview/
-└── README.md
-```
-
----
-
-## Short Descriptions (for portfolio / resume)
-
-**One line:**  
-AI-powered interview prep app that generates tailored questions, skill gaps, and a study roadmap from your resume and a job description.
-
-**Paragraph:**  
-Interview Master is a MERN-style application (React + Express + MongoDB) integrated with Google Gemini. Users authenticate securely, submit a job posting and their profile, and receive a structured interview preparation report with technical and behavioral Q&A, match scoring, and a multi-day roadmap. The platform also generates job-specific resume PDFs using Gemini and Puppeteer.
+**InterviewIQ** — AI interview prep app (React, Node.js, MongoDB, Google Gemini). Analyzes job description + resume to generate match score, skill gaps, and day-by-day prep roadmap with technical/behavioral Q&A and tailored resume PDF export.
 
 ---
 
 ## Author
 
-Built as a full-stack learning / portfolio project demonstrating REST APIs, JWT auth, file uploads, AI structured output, and modern React patterns.
+Full-stack portfolio project — REST APIs, JWT auth, file uploads, structured AI output, and modern React architecture.
